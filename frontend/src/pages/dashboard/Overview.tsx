@@ -1,23 +1,37 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useAuthStore } from '../../store/auth.store';
 import { Card, CardHeader, CardTitle, CardDescription } from '../../components/ui/Card';
 import { Badge } from '../../components/ui/Badge';
 import { SkeletonCard } from '../../components/ui/Skeleton';
 import { Button } from '../../components/ui/Button';
-import { Zap, Flame, Award, CalendarCheck, TrendingUp, Users } from 'lucide-react';
+import { Zap, Flame, Award, CalendarCheck, TrendingUp, ExternalLink, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import ActivityCalendar from 'react-activity-calendar';
 import api from '../../lib/axios';
 import { Attendance, RewardHistory } from '../../lib/types';
 
 export function DashboardOverview() {
   const { user } = useAuthStore();
+  const [arbpayUrl, setArbpayUrl] = useState<string | null>(null);
 
   // Fetch today's attendance status to show on dashboard
   const { data: attendanceHistory, isLoading: isLoadingAttendance } = useQuery({
     queryKey: ['attendance', 'history'],
     queryFn: async () => {
       const res = await api.get('/attendance/history?limit=1');
+      return res.data.data as Attendance[];
+    },
+  });
+
+  // Fetch full history for calendar
+  const { data: fullHistory } = useQuery({
+    queryKey: ['attendance', 'full-history'],
+    queryFn: async () => {
+      const start = new Date();
+      start.setDate(start.getDate() - 365);
+      const startDate = start.toISOString().split('T')[0];
+      const res = await api.get(`/attendance/history?limit=365&startDate=${startDate}`);
       return res.data.data as Attendance[];
     },
   });
@@ -35,8 +49,32 @@ export function DashboardOverview() {
   const lastMarkedDate = attendanceHistory?.[0]?.date.split('T')[0];
   const isMarkedToday = lastMarkedDate === today;
 
+  // Generate 365 days of data for the calendar
+  const calendarData = useMemo(() => {
+    const data = [];
+    const d = new Date();
+    d.setDate(d.getDate() - 365);
+    
+    for (let i = 0; i <= 365; i++) {
+      const dateStr = d.toISOString().split('T')[0];
+      const attended = fullHistory?.some(h => h.date.startsWith(dateStr));
+      data.push({
+        date: dateStr,
+        count: attended ? 1 : 0,
+        level: attended ? 4 : 0 // Level 4 is max intensity (dark green)
+      });
+      d.setDate(d.getDate() + 1);
+    }
+    return data;
+  }, [fullHistory]);
+
+  const explicitTheme = {
+    light: ['#ebedf0', '#39d353'],
+    dark: ['#2d333b', '#39d353'],
+  };
+
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="space-y-6 animate-fade-in relative">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-display font-bold text-surface-900">
@@ -57,7 +95,7 @@ export function DashboardOverview() {
       </header>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <Card hover padding="sm" className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-warning-500/15 text-warning-500 flex items-center justify-center">
             <Flame className="w-6 h-6" />
@@ -79,16 +117,6 @@ export function DashboardOverview() {
         </Card>
 
         <Card hover padding="sm" className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-xl bg-primary-500/15 text-primary-500 flex items-center justify-center">
-            <Users className="w-6 h-6" />
-          </div>
-          <div>
-            <p className="text-sm text-surface-600">Referrals</p>
-            <p className="text-2xl font-display font-bold text-surface-900">{user?.referralCount || 0}</p>
-          </div>
-        </Card>
-
-        <Card hover padding="sm" className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-success-500/15 text-success-500 flex items-center justify-center">
             <Award className="w-6 h-6" />
           </div>
@@ -101,8 +129,29 @@ export function DashboardOverview() {
         </Card>
       </div>
 
+      {/* Activity Calendar */}
+      <Card className="overflow-x-auto">
+        <CardHeader>
+          <CardTitle>Attendance Activity</CardTitle>
+          <CardDescription>{user?.attendanceCount || 0} days active in the last year</CardDescription>
+        </CardHeader>
+        <div className="p-6 pt-0 min-w-max flex justify-center">
+          <ActivityCalendar
+            data={calendarData}
+            theme={explicitTheme}
+            colorScheme={document.documentElement.classList.contains('dark') ? 'dark' : 'light'}
+            labels={{
+              totalCount: '{{count}} attendance days in the last year',
+            }}
+            blockSize={14}
+            blockMargin={5}
+            fontSize={14}
+          />
+        </div>
+      </Card>
+
       <div className="grid md:grid-cols-2 gap-6">
-        {/* Quick Actions / Getting Started */}
+        {/* Quick Actions / Arbpay */}
         <Card className="flex flex-col">
           <CardHeader>
             <CardTitle>Next Steps</CardTitle>
@@ -122,11 +171,21 @@ export function DashboardOverview() {
             <div className="flex items-center justify-between p-3 rounded-lg bg-surface-200 border border-surface-300">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-primary-500/20 text-primary-500 flex items-center justify-center">
-                  <Users className="w-4 h-4" />
+                  <ExternalLink className="w-4 h-4" />
                 </div>
-                <span className="font-medium text-surface-800">Refer a colleague</span>
+                <span className="font-medium text-surface-800">Register on Arbpay</span>
               </div>
-              <Link to="/app/referrals"><Button variant="secondary" size="sm">Get Code</Button></Link>
+              <Button variant="secondary" size="sm" onClick={() => setArbpayUrl('https://arbpay.cc/#/register?code=AR4TEBT')}>Register</Button>
+            </div>
+
+            <div className="flex items-center justify-between p-3 rounded-lg bg-surface-200 border border-surface-300">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-info-500/20 text-info-500 flex items-center justify-center">
+                  <ExternalLink className="w-4 h-4" />
+                </div>
+                <span className="font-medium text-surface-800">Open Arbpay</span>
+              </div>
+              <Button variant="secondary" size="sm" onClick={() => setArbpayUrl('https://arbpay.cc')}>Open App</Button>
             </div>
           </div>
         </Card>
@@ -173,6 +232,36 @@ export function DashboardOverview() {
           </div>
         </Card>
       </div>
+
+      {/* Arbpay Iframe Modal */}
+      {arbpayUrl && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 animate-fade-in">
+          <div className="bg-surface-50 w-full max-w-6xl h-[90vh] rounded-2xl overflow-hidden flex flex-col shadow-2xl animate-scale-in">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-surface-200 bg-surface-100">
+              <div className="flex items-center gap-3">
+                <h2 className="font-display font-bold text-surface-900">Arbpay Portal</h2>
+                <a href={arbpayUrl} target="_blank" rel="noreferrer" className="text-xs text-primary-500 hover:underline">
+                  (Open in new tab)
+                </a>
+              </div>
+              <button 
+                onClick={() => setArbpayUrl(null)}
+                className="p-2 rounded-lg hover:bg-surface-200 text-surface-600 transition-colors"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <div className="flex-1 bg-surface-200 relative">
+              <iframe 
+                src={arbpayUrl} 
+                className="w-full h-full border-0"
+                title="Arbpay"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -61,7 +61,6 @@ export function ApprovalsPage() {
                 <tr>
                   <th className="px-6 py-3 font-semibold">Applicant</th>
                   <th className="px-6 py-3 font-semibold">Date Applied</th>
-                  <th className="px-6 py-3 font-semibold">Referral Code Used</th>
                   <th className="px-6 py-3 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
@@ -80,15 +79,7 @@ export function ApprovalsPage() {
                     <td className="px-6 py-4 text-surface-600">
                       {new Date(user.createdAt).toLocaleDateString()}
                     </td>
-                    <td className="px-6 py-4">
-                      {user.referredBy ? (
-                        <span className="font-mono bg-surface-200 px-2 py-1 rounded text-surface-700 text-xs">
-                          {user.referredBy}
-                        </span>
-                      ) : (
-                        <span className="text-surface-400 italic">None</span>
-                      )}
-                    </td>
+
                     <td className="px-6 py-4">
                       <div className="flex justify-end gap-2">
                         <Button

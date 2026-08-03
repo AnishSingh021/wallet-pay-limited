@@ -23,7 +23,7 @@ export function Landing() {
           </h1>
           
           <p className="text-xl text-surface-600 max-w-2xl mx-auto">
-            The exclusive employee platform for attendance tracking, referral bonuses, and community announcements. Build streaks, earn rewards.
+            The exclusive employee platform for attendance tracking and community announcements. Build streaks, earn rewards.
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
@@ -59,7 +59,7 @@ export function Landing() {
               {
                 icon: <Gift className="w-6 h-6 text-primary-500" />,
                 title: 'Cash Rewards',
-                description: 'Earn real cash rewards based on your performance, attendance, and referrals. Track payouts easily.'
+                description: 'Earn real cash rewards based on your performance and attendance. Track payouts easily.'
               },
               {
                 icon: <Shield className="w-6 h-6 text-success-500" />,

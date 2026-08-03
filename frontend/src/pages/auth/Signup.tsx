@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Card } from '../../components/ui/Card';
-import { Mail, Lock, User, Phone, Hash, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { Mail, Lock, User, Phone, AlertCircle, CheckCircle2 } from 'lucide-react';
 import api from '../../lib/axios';
 
 export function Signup() {
@@ -14,7 +14,6 @@ export function Signup() {
     email: '',
     phone: '',
     password: '',
-    referralCode: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -123,14 +122,7 @@ export function Signup() {
             hint="Must be at least 6 characters long."
           />
 
-          <Input
-            label="Referral Code (Optional)"
-            name="referralCode"
-            value={formData.referralCode}
-            onChange={handleChange}
-            icon={<Hash className="w-5 h-5" />}
-            placeholder="WP-XXXXXXX"
-          />
+
 
           <Button type="submit" fullWidth size="lg" isLoading={isLoading} className="mt-4">
             Create Account

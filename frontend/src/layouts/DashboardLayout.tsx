@@ -30,7 +30,6 @@ export function DashboardLayout() {
   const memberNav = [
     { name: 'Dashboard', href: '/app', icon: LayoutDashboard },
     { name: 'Attendance', href: '/app/attendance', icon: CalendarCheck },
-    { name: 'Referrals', href: '/app/referrals', icon: Users },
     { name: 'Rewards', href: '/app/rewards', icon: Gift },
     { name: 'Announcements', href: '/app/announcements', icon: Bell },
     { name: 'Profile', href: '/app/profile', icon: UserIcon },

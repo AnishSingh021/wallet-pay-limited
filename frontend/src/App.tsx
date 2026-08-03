@@ -25,7 +25,6 @@ const queryClient = new QueryClient({
 
 import { DashboardOverview } from './pages/dashboard/Overview';
 import { AttendancePage } from './pages/dashboard/Attendance';
-import { ReferralsPage } from './pages/dashboard/Referrals';
 import { RewardsPage } from './pages/dashboard/Rewards';
 import { ProfilePage } from './pages/dashboard/Profile';
 import { AnnouncementsPage } from './pages/dashboard/Announcements';
@@ -74,7 +73,6 @@ function App() {
           >
             <Route index element={<DashboardOverview />} />
             <Route path="attendance" element={<AttendancePage />} />
-            <Route path="referrals" element={<ReferralsPage />} />
             <Route path="rewards" element={<RewardsPage />} />
             <Route path="announcements" element={<AnnouncementsPage />} />
             <Route path="profile" element={<ProfilePage />} />
