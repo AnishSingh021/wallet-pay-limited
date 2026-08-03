@@ -1,5 +1,6 @@
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+import { initializeApp, getApp, getApps } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getAnalytics, isSupported } from "firebase/analytics";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBA5dfDUwwDsJtBRx2-b8ucXy3qPIS7-Fw",
@@ -8,16 +9,28 @@ const firebaseConfig = {
   storageBucket: "wallet-pay-12867.firebasestorage.app",
   messagingSenderId: "615152838967",
   appId: "1:615152838967:web:3cbaa30773adec3da252b2",
-  measurementId: "G-EVMDQ574ZN"
+  measurementId: "G-EVMDQ574ZN",
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Prevent Firebase from initializing more than once
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
-// Initialize Analytics if we are in the browser
+// Firebase Authentication
+const auth = getAuth(app);
+
+// Firebase Analytics
 let analytics = null;
-if (typeof window !== 'undefined') {
-  analytics = getAnalytics(app);
+
+if (typeof window !== "undefined") {
+  isSupported()
+    .then((supported) => {
+      if (supported) {
+        analytics = getAnalytics(app);
+      }
+    })
+    .catch(() => {
+      // Analytics unavailable; authentication can still work.
+    });
 }
 
-export { app, analytics };
+export { app, auth, analytics };
