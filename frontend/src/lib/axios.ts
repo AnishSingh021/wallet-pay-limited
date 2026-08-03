@@ -1,59 +1,97 @@
-import axios from 'axios';
-import { useAuthStore } from '../store/auth.store';
+import axios from "axios";
+import { useAuthStore } from "../store/auth.store";
 
-const API_URL = import.meta.env.VITE_API_URL || '';
+const API_URL = import.meta.env.VITE_API_URL || "";
 
 const api = axios.create({
   baseURL: `${API_URL}/api`,
-  withCredentials: true, // important for sending/receiving cookies (refresh token)
+  withCredentials: true,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
-// Add a request interceptor to inject the access token
+// ---------------- REQUEST ----------------
+
 api.interceptors.request.use(
   (config) => {
     const token = useAuthStore.getState().accessToken;
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
     return config;
   },
   (error) => Promise.reject(error)
 );
 
-// Add a response interceptor to handle token refresh and generic errors
+// ---------------- RESPONSE ----------------
+
+let isRefreshing = false;
+
 api.interceptors.response.use(
   (response) => response,
+
   async (error) => {
     const originalRequest = error.config;
-    
-    // If we get a 401 Unauthorized and it's not a retry request
-    if (error.response?.status === 401 && !originalRequest._retry) {
+
+    // No response from server
+    if (!error.response) {
+      return Promise.reject(error);
+    }
+
+    // Don't refresh these endpoints
+    if (
+      originalRequest.url?.includes("/auth/login") ||
+      originalRequest.url?.includes("/auth/logout") ||
+      originalRequest.url?.includes("/auth/refresh") ||
+      originalRequest.url?.includes("/auth/firebase")
+    ) {
+      return Promise.reject(error);
+    }
+
+    // Token expired
+    if (
+      error.response.status === 401 &&
+      !originalRequest._retry &&
+      !isRefreshing
+    ) {
       originalRequest._retry = true;
-      
+      isRefreshing = true;
+
       try {
-        // Attempt to refresh the token via our auth endpoint (which reads the HttpOnly cookie)
-        // We use axios directly here to avoid interceptor loops
-        const response = await axios.post(`${import.meta.env.VITE_API_URL || ''}/api/auth/refresh`, {}, { withCredentials: true });
-        
-        if (response.data.success && response.data.data.accessToken) {
-          const newAccessToken = response.data.data.accessToken;
-          // Update the store with the new token
-          useAuthStore.getState().setAccessToken(newAccessToken);
-          
-          // Retry the original request with the new token
-          originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-          return api(originalRequest);
-        }
-      } catch (refreshError) {
-        // If refresh fails, log the user out entirely
-        useAuthStore.getState().logout();
-        return Promise.reject(refreshError);
+        const refreshResponse = await axios.post(
+          `${API_URL}/api/auth/refresh`,
+          {},
+          {
+            withCredentials: true,
+          }
+        );
+
+        const newToken = refreshResponse.data.data.accessToken;
+
+        useAuthStore.getState().setAccessToken(newToken);
+
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+
+        isRefreshing = false;
+
+        return api(originalRequest);
+      } catch (err) {
+        isRefreshing = false;
+
+        // DON'T call logout here
+        useAuthStore.setState({
+          user: null,
+          accessToken: null,
+          isAuthenticated: false,
+        });
+
+        return Promise.reject(err);
       }
     }
-    
+
     return Promise.reject(error);
   }
 );
