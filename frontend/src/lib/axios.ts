@@ -1,7 +1,13 @@
 import axios from "axios";
 import { useAuthStore } from "../store/auth.store";
 
-const API_URL = import.meta.env.VITE_API_URL || "";
+let API_URL = import.meta.env.VITE_API_URL || "";
+// Safeguard: remove trailing /api if the user accidentally included it in their .env
+if (API_URL.endsWith('/api')) {
+  API_URL = API_URL.slice(0, -4);
+} else if (API_URL.endsWith('/api/')) {
+  API_URL = API_URL.slice(0, -5);
+}
 
 const api = axios.create({
   baseURL: `${API_URL}/api`,

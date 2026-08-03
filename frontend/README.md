@@ -11,6 +11,17 @@ Currently, two official plugins are available:
 
 The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
+## Environment Variables
+
+When deploying or running locally, you must provide the backend API URL. 
+**IMPORTANT**: The `VITE_API_URL` should be the base domain **WITHOUT** a trailing `/api`.
+
+For example:
+- Correct: `VITE_API_URL=http://localhost:5000`
+- Incorrect: `VITE_API_URL=http://localhost:5000/api`
+
+The frontend Axios configuration is set up to automatically append `/api` to all requests.
+
 ## Expanding the Oxlint configuration
 
 If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
