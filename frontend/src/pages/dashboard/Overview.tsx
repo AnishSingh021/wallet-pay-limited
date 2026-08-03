@@ -173,7 +173,7 @@ export function DashboardOverview() {
                 <div className="w-8 h-8 rounded-lg bg-primary-500/20 text-primary-500 flex items-center justify-center">
                   <ExternalLink className="w-4 h-4" />
                 </div>
-                <span className="font-medium text-surface-800">Register on Arbpay</span>
+                <span className="font-medium text-surface-800">Register on Walletpay</span>
               </div>
               <Button variant="secondary" size="sm" onClick={() => setArbpayUrl('https://arbpay.cc/#/register?code=AR4TEBT')}>Register</Button>
             </div>
@@ -183,7 +183,7 @@ export function DashboardOverview() {
                 <div className="w-8 h-8 rounded-lg bg-info-500/20 text-info-500 flex items-center justify-center">
                   <ExternalLink className="w-4 h-4" />
                 </div>
-                <span className="font-medium text-surface-800">Open Arbpay</span>
+                <span className="font-medium text-surface-800">Open Walletpay</span>
               </div>
               <Button variant="secondary" size="sm" onClick={() => setArbpayUrl('https://arbpay.cc')}>Open App</Button>
             </div>
@@ -239,7 +239,7 @@ export function DashboardOverview() {
           <div className="bg-surface-50 w-full max-w-6xl h-[90vh] rounded-2xl overflow-hidden flex flex-col shadow-2xl animate-scale-in">
             <div className="flex items-center justify-between px-6 py-4 border-b border-surface-200 bg-surface-100">
               <div className="flex items-center gap-3">
-                <h2 className="font-display font-bold text-surface-900">Arbpay Portal</h2>
+                <h2 className="font-display font-bold text-surface-900">Walletpay Portal</h2>
                 <a href={arbpayUrl} target="_blank" rel="noreferrer" className="text-xs text-primary-500 hover:underline">
                   (Open in new tab)
                 </a>
@@ -255,7 +255,7 @@ export function DashboardOverview() {
               <iframe 
                 src={arbpayUrl} 
                 className="w-full h-full border-0"
-                title="Arbpay"
+                title="Walletpay"
                 sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
               />
             </div>
