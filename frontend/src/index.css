@@ -1,0 +1,300 @@
+@import "tailwindcss";
+
+/* ══════════════════════════════════════════════════════════════
+   WALLET PAY — Design System Tokens (Tailwind CSS v4)
+   ══════════════════════════════════════════════════════════════ */
+
+@theme {
+  /* ── Typography ── */
+  --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-display: "Outfit", "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+
+  /* ── Brand: Indigo-Violet Primary ── */
+  --color-primary-50: #eef2ff;
+  --color-primary-100: #dbe4ff;
+  --color-primary-200: #bac8ff;
+  --color-primary-300: #91a7ff;
+  --color-primary-400: #748ffc;
+  --color-primary-500: #5c7cfa;
+  --color-primary-600: #4c6ef5;
+  --color-primary-700: #4263eb;
+  --color-primary-800: #3b5bdb;
+  --color-primary-900: #364fc7;
+
+  /* ── Accent: Teal-Emerald ── */
+  --color-accent-50: #e6fcf5;
+  --color-accent-100: #c3fae8;
+  --color-accent-200: #96f2d7;
+  --color-accent-300: #63e6be;
+  --color-accent-400: #38d9a9;
+  --color-accent-500: #20c997;
+  --color-accent-600: #12b886;
+  --color-accent-700: #0ca678;
+  --color-accent-800: #099268;
+  --color-accent-900: #087f5b;
+
+  /* ── Surface Scale (Dark) ── */
+  --color-surface-0: #0a0b10;
+  --color-surface-50: #101119;
+  --color-surface-100: #171822;
+  --color-surface-150: #1e1f2b;
+  --color-surface-200: #262735;
+  --color-surface-250: #2e2f40;
+  --color-surface-300: #383a4e;
+  --color-surface-400: #4f5069;
+  --color-surface-500: #6b6d85;
+  --color-surface-600: #8f91a8;
+  --color-surface-700: #b3b5c8;
+  --color-surface-800: #d5d7e2;
+  --color-surface-900: #ecedf5;
+
+  /* ── Semantic ── */
+  --color-success-400: #69db7c;
+  --color-success-500: #51cf66;
+  --color-success-600: #40c057;
+  --color-warning-400: #ffd43b;
+  --color-warning-500: #fcc419;
+  --color-warning-600: #fab005;
+  --color-danger-400: #ff8787;
+  --color-danger-500: #ff6b6b;
+  --color-danger-600: #fa5252;
+  --color-info-400: #74c0fc;
+  --color-info-500: #4dabf7;
+  --color-info-600: #339af0;
+
+  /* ── Radius ── */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-2xl: 28px;
+  --radius-full: 9999px;
+
+  /* ── Shadows (dark-optimized, heavier) ── */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.5), 0 4px 12px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 24px 60px rgba(0, 0, 0, 0.5), 0 8px 20px rgba(0, 0, 0, 0.35);
+  --shadow-glow-primary: 0 0 24px rgba(92, 124, 250, 0.3);
+  --shadow-glow-accent: 0 0 24px rgba(32, 201, 151, 0.3);
+
+  /* ── Transitions ── */
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Light Theme Override
+   ══════════════════════════════════════════════════════════════ */
+.light {
+  --color-surface-0: #f5f6fa;
+  --color-surface-50: #ffffff;
+  --color-surface-100: #ffffff;
+  --color-surface-150: #f0f1f7;
+  --color-surface-200: #e4e5ef;
+  --color-surface-250: #d8d9e5;
+  --color-surface-300: #c5c7d6;
+  --color-surface-400: #9b9db5;
+  --color-surface-500: #6b6d85;
+  --color-surface-600: #9b9db5;
+  --color-surface-700: #44465c;
+  --color-surface-800: #2a2b3a;
+  --color-surface-900: #101119;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.1), 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-xl: 0 24px 60px rgba(0, 0, 0, 0.12), 0 8px 20px rgba(0, 0, 0, 0.08);
+  --shadow-glow-primary: 0 0 24px rgba(92, 124, 250, 0.15);
+  --shadow-glow-accent: 0 0 24px rgba(32, 201, 151, 0.15);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Global Base Styles
+   ══════════════════════════════════════════════════════════════ */
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--color-surface-0);
+    color: var(--color-surface-800);
+    line-height: 1.6;
+    transition: background-color 0.3s var(--ease-smooth), color 0.3s var(--ease-smooth);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    color: var(--color-surface-900);
+    line-height: 1.2;
+  }
+
+  /* Scrollbar styling for dark theme */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--color-surface-50);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-surface-300);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-surface-400);
+  }
+
+  /* Focus visible */
+  :focus-visible {
+    outline: 2px solid var(--color-primary-500);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Remove focus outline for mouse users */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Utility Animations
+   ══════════════════════════════════════════════════════════════ */
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-24px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(92, 124, 250, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(92, 124, 250, 0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@layer utilities {
+  .animate-fade-in {
+    animation: fadeIn 0.4s var(--ease-smooth) both;
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 0.5s var(--ease-smooth) both;
+  }
+
+  .animate-slide-in-right {
+    animation: slideInRight 0.4s var(--ease-smooth) both;
+  }
+
+  .animate-slide-in-left {
+    animation: slideInLeft 0.4s var(--ease-smooth) both;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.3s var(--ease-smooth) both;
+  }
+
+  .animate-shimmer {
+    background: linear-gradient(
+      90deg,
+      var(--color-surface-100) 25%,
+      var(--color-surface-200) 50%,
+      var(--color-surface-100) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 2s infinite;
+  }
+
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  /* Staggered animation delays */
+  .delay-1 { animation-delay: 0.1s; }
+  .delay-2 { animation-delay: 0.2s; }
+  .delay-3 { animation-delay: 0.3s; }
+  .delay-4 { animation-delay: 0.4s; }
+  .delay-5 { animation-delay: 0.5s; }
+  .delay-6 { animation-delay: 0.6s; }
+
+  /* Gradient text */
+  .text-gradient-primary {
+    background: linear-gradient(135deg, var(--color-primary-400), var(--color-accent-400));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Glass effect */
+  .glass {
+    background: rgba(23, 24, 34, 0.6);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--color-surface-300);
+  }
+
+  .light .glass {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid var(--color-surface-300);
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   Google Fonts Import
+   ══════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
