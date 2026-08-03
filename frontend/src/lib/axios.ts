@@ -1,8 +1,10 @@
 import axios from 'axios';
 import { useAuthStore } from '../store/auth.store';
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 const api = axios.create({
-  baseURL: '/api',
+  baseURL: `${API_URL}/api`,
   withCredentials: true, // important for sending/receiving cookies (refresh token)
   headers: {
     'Content-Type': 'application/json',
@@ -34,7 +36,7 @@ api.interceptors.response.use(
       try {
         // Attempt to refresh the token via our auth endpoint (which reads the HttpOnly cookie)
         // We use axios directly here to avoid interceptor loops
-        const response = await axios.post('/api/auth/refresh', {}, { withCredentials: true });
+        const response = await axios.post(`${import.meta.env.VITE_API_URL || ''}/api/auth/refresh`, {}, { withCredentials: true });
         
         if (response.data.success && response.data.data.accessToken) {
           const newAccessToken = response.data.data.accessToken;
