@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { register, login, refresh, logout } = require('../controllers/auth.controller');
+const { register, login, refresh, logout, firebaseAuth } = require('../controllers/auth.controller');
 const { authenticate } = require('../middleware/auth');
 const { validate } = require('../middleware/validate');
 const { registerSchema, loginSchema } = require('../validators/auth.validators');
@@ -16,5 +16,8 @@ router.post('/refresh', refresh);
 
 // POST /api/auth/logout
 router.post('/logout', authenticate, logout);
+
+// POST /api/auth/firebase
+router.post('/firebase', firebaseAuth);
 
 module.exports = router;

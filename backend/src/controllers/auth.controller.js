@@ -262,4 +262,114 @@ const logout = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, refresh, logout };
+/**
+ * @desc    Verify Firebase token and login/register user
+ * @route   POST /api/auth/firebase
+ * @access  Public
+ */
+const firebaseAuth = async (req, res, next) => {
+  try {
+    const { idToken } = req.body;
+    if (!idToken) {
+      return res.status(400).json({ success: false, message: 'No ID token provided.' });
+    }
+
+    // Verify token using Google Identity Toolkit REST API
+    const apiKey = process.env.FIREBASE_API_KEY;
+    const verifyUrl = `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`;
+    
+    // We can use global fetch in modern Node
+    const response = await fetch(verifyUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idToken })
+    });
+    const data = await response.json();
+
+    if (!response.ok || !data.users || data.users.length === 0) {
+      return res.status(401).json({ success: false, message: 'Invalid Firebase ID token.' });
+    }
+
+    const firebaseUser = data.users[0];
+    const email = firebaseUser.email;
+    const phone = firebaseUser.phoneNumber;
+    const displayName = firebaseUser.displayName || email?.split('@')[0] || 'User';
+
+    // Find user by email or phone
+    let user;
+    if (email) user = await User.findOne({ email });
+    if (!user && phone) user = await User.findOne({ phone });
+
+    // If no user exists, create one
+    if (!user) {
+      let userReferralCode;
+      let isUnique = false;
+      while (!isUnique) {
+        userReferralCode = generateReferralCode();
+        const existing = await User.findOne({ referralCode: userReferralCode });
+        if (!existing) isUnique = true;
+      }
+
+      user = new User({
+        email: email || `${phone}@placeholder.com`, // Email is required in our schema
+        passwordHash: idToken.substring(0, 20), // Placeholder password for OAuth users
+        displayName,
+        phone: phone || '',
+        referralCode: userReferralCode,
+        isApproved: false, // Requires admin approval just like regular signup
+        isActive: true,
+      });
+      await user.save();
+      
+      return res.status(403).json({
+        success: false,
+        message: 'Account created successfully! Your account is pending admin approval. You will be notified once approved.',
+        code: 'PENDING_APPROVAL',
+      });
+    }
+
+    // Check account status
+    if (!user.isActive) {
+      return res.status(403).json({
+        success: false,
+        message: 'Your account has been deactivated. Please contact an administrator.',
+      });
+    }
+
+    if (!user.isApproved) {
+      return res.status(403).json({
+        success: false,
+        message: 'Your account is pending admin approval. You will be notified once approved.',
+        code: 'PENDING_APPROVAL',
+      });
+    }
+
+    // Generate tokens
+    const accessToken = generateAccessToken({ id: user._id.toString(), role: user.role });
+    const refreshToken = generateRefreshToken({ id: user._id.toString() });
+
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/',
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Login successful.',
+      data: {
+        user: user.toJSON(),
+        accessToken,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { register, login, refresh, logout, firebaseAuth };

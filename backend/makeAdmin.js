@@ -1,37 +1,31 @@
-require("dotenv").config();
-const mongoose = require("mongoose");
-const User = require("./src/models/User");
+require('dotenv').config();
+const mongoose = require('mongoose');
+const User = require('./src/models/User');
 
 async function makeAdmin() {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
-
-    const email = "anishsingh10121@gmail.com";
-
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      console.log("User not found");
-      return;
+    
+    // We will update both emails just in case
+    const emails = ['anishsingh10121@gmail.com', 'anish@gmail.com'];
+    
+    for (const email of emails) {
+      const user = await User.findOne({ email });
+      if (user) {
+        user.role = 'admin';
+        user.isApproved = true;
+        user.isActive = true;
+        await user.save({ validateBeforeSave: false });
+        console.log(`Successfully approved and made ${email} an admin.`);
+      } else {
+        console.log(`User ${email} not found in DB.`);
+      }
     }
-
-    // Fix missing required field
-    if (!user.displayName) {
-      user.displayName = user.name || "Anish";
-    }
-
-    user.role = "admin";
-    user.isApproved = true;
-    user.isActive = true;
-    user.rewardEligible = true;
-
-    await user.save();
-
-    console.log("✅ User updated successfully");
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
+    console.error('Error:', error);
   } finally {
     await mongoose.disconnect();
+    process.exit(0);
   }
 }
 
