@@ -69,16 +69,6 @@ export function AttendancePage() {
           <h1 className="text-2xl font-display font-bold text-surface-900">Attendance</h1>
           <p className="text-surface-600 mt-1">Mark your daily presence and track streaks.</p>
         </div>
-        {!isMarkedToday && (
-          <Button
-            size="lg"
-            icon={<Zap className="w-5 h-5" />}
-            isLoading={markAttendanceMutation.isPending}
-            onClick={() => markAttendanceMutation.mutate()}
-          >
-            Mark Today's Attendance
-          </Button>
-        )}
       </header>
 
       {error && (

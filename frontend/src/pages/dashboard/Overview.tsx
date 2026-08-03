@@ -82,16 +82,6 @@ export function DashboardOverview() {
           </h1>
           <p className="text-surface-600 mt-1">Here's your summary for today.</p>
         </div>
-        <div className="flex gap-3">
-          <Link to="/app/attendance">
-            <Button 
-              variant={isMarkedToday ? 'secondary' : 'primary'} 
-              icon={<CalendarCheck className="w-4 h-4" />}
-            >
-              {isMarkedToday ? 'Attendance Marked' : 'Mark Attendance'}
-            </Button>
-          </Link>
-        </div>
       </header>
 
       {/* Stats Grid */}
@@ -158,15 +148,6 @@ export function DashboardOverview() {
             <CardDescription>Keep up your momentum</CardDescription>
           </CardHeader>
           <div className="flex-1 flex flex-col gap-3">
-            <div className="flex items-center justify-between p-3 rounded-lg bg-surface-200 border border-surface-300">
-              <div className="flex items-center gap-3">
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isMarkedToday ? 'bg-success-500/20 text-success-500' : 'bg-surface-300 text-surface-600'}`}>
-                  <Zap className="w-4 h-4" />
-                </div>
-                <span className="font-medium text-surface-800">Today's Attendance</span>
-              </div>
-              {isMarkedToday ? <Badge variant="success">Done</Badge> : <Link to="/app/attendance"><Button size="sm">Mark Now</Button></Link>}
-            </div>
             
             <div className="flex items-center justify-between p-3 rounded-lg bg-surface-200 border border-surface-300">
               <div className="flex items-center gap-3">

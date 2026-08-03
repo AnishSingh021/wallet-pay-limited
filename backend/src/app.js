@@ -27,7 +27,11 @@ app.use(morgan('dev'));
 
 // ── CORS ──
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: [
+    'http://localhost:5173',
+    'https://wallet-pay-limited.vercel.app',
+    process.env.FRONTEND_URL
+  ].filter(Boolean),
   credentials: true, // Allow cookies (refresh token)
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
