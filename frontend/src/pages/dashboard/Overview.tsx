@@ -7,7 +7,7 @@ import { SkeletonCard } from '../../components/ui/Skeleton';
 import { Button } from '../../components/ui/Button';
 import { Zap, Flame, Award, CalendarCheck, TrendingUp, ExternalLink, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import ActivityCalendar from 'react-activity-calendar';
+import { ActivityCalendar } from 'react-activity-calendar';
 import api from '../../lib/axios';
 import { Attendance, RewardHistory } from '../../lib/types';
 
