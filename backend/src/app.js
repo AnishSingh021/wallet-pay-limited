@@ -14,6 +14,7 @@ const referralRoutes = require('./routes/referral.routes');
 const rewardRoutes = require('./routes/reward.routes');
 const announcementRoutes = require('./routes/announcement.routes');
 const documentRoutes = require('./routes/document.routes');
+const notificationRoutes = require('./routes/notification.routes');
 
 const app = express();
 
@@ -65,6 +66,7 @@ app.use('/api/referrals', referralRoutes);
 app.use('/api/rewards', rewardRoutes);
 app.use('/api/announcements', announcementRoutes);
 app.use('/api/documents', documentRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Import and mount payment routes
 const paymentRoutes = require('./routes/payment.routes');

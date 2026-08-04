@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
+import { Wallet } from 'lucide-react';
 import './Intro.css';
-import { WalletCrash, WalletCrashRefs } from './WalletCrash';
-import { CoinExplosion, CoinExplosionRefs } from './CoinExplosion';
 
 interface IntroAnimationProps {
   onComplete: () => void;
@@ -10,18 +9,20 @@ interface IntroAnimationProps {
 
 export function IntroAnimation({ onComplete }: IntroAnimationProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const textWalletRef = useRef<HTMLDivElement>(null);
-  const textPayRef = useRef<HTMLDivElement>(null);
   
-  const crashRefs = useRef<WalletCrashRefs>(null);
-  const explosionRefs = useRef<CoinExplosionRefs>(null);
-  const sweepRef = useRef<HTMLDivElement>(null);
+  // Text elements
+  const textWRef = useRef<HTMLSpanElement>(null);
+  const textAlletRef = useRef<HTMLDivElement>(null);
+  const textPayRef = useRef<HTMLDivElement>(null);
+  const textFullRef = useRef<HTMLDivElement>(null); // For shatter effect
+  
+  // Crash & Coins
+  const walletRef = useRef<HTMLDivElement>(null);
+  const impactFlashRef = useRef<HTMLDivElement>(null);
+  const coinsContainerRef = useRef<HTMLDivElement>(null);
   
   const tl = useRef<gsap.core.Timeline>(null);
   const [showSkip, setShowSkip] = useState(false);
-
-  const walletLetters = "Wallet".split("");
-  const payLetters = "Pay".split("");
 
   const handleSkip = () => {
     if (tl.current) tl.current.progress(1);
@@ -34,200 +35,152 @@ export function IntroAnimation({ onComplete }: IntroAnimationProps) {
   }, []);
 
   useEffect(() => {
-    if (!containerRef.current || !crashRefs.current || !explosionRefs.current) return;
+    if (!containerRef.current) return;
 
-    // 1. Setup Elements & Initial States
+    // We'll generate 60 coins for the explosion
+    const coins = Array.from(coinsContainerRef.current?.children || []);
+
     const timeline = gsap.timeline({
       onComplete: () => {
         gsap.to(containerRef.current, {
           opacity: 0,
-          duration: 0.5,
+          duration: 0.8,
           ease: "power2.inOut",
           onComplete: onComplete
         });
       }
     });
 
-    const wLetters = Array.from(textWalletRef.current?.children || []);
-    const pLetters = Array.from(textPayRef.current?.children || []);
-    const allText = [...wLetters, ...pLetters];
+    const alletLetters = Array.from(textAlletRef.current?.children || []);
+    const payLetters = Array.from(textPayRef.current?.children || []);
     
-    // Initial Text State
-    gsap.set(allText, { opacity: 0, y: 50, rotateX: -60, rotateZ: 5, filter: 'blur(10px)', scale: 0.8 });
+    // Initial states
+    gsap.set(textWRef.current, { x: -300, opacity: 0 });
+    gsap.set([...alletLetters, ...payLetters], { y: 20, opacity: 0 });
+    gsap.set(walletRef.current, { y: -500, rotationZ: -20, opacity: 0, scale: 2 });
+    gsap.set(impactFlashRef.current, { scale: 0, opacity: 0 });
+    gsap.set(textFullRef.current, { opacity: 1 });
+    
+    coins.forEach((coin: any) => {
+      gsap.set(coin, { opacity: 0, scale: 0, x: 0, y: 0, z: 0 });
+    });
 
-    // Scene 1: Black screen + Blue light sweep
-    // Duration: 0.0 -> 0.3
-    if (sweepRef.current) {
-      timeline.fromTo(sweepRef.current, 
-        { x: "-150%", opacity: 1 }, 
-        { x: "150%", duration: 0.6, ease: "power2.inOut" }, 
-        0
-      );
-    }
-
-    // Scene 2: "Wallet" tight stagger
-    // Duration: 0.1 -> 0.5
-    timeline.to(wLetters, {
-      y: 0,
-      rotateX: 0,
-      rotateZ: 0,
+    // Step 1: "W" appears
+    timeline.to(textWRef.current, {
+      x: 0,
       opacity: 1,
-      filter: 'blur(0px)',
-      scale: 1,
-      duration: 0.6,
-      ease: "expo.out",
-      stagger: 0.04
-    }, 0.1);
+      duration: 0.4,
+      ease: "back.out(1.2)",
+    }, 0);
 
-    // Scene 3: "Pay" morphs in
-    // Duration: 0.3 -> 0.7
-    timeline.to(pLetters, {
+    // Step 2: "allet" appears
+    timeline.to(alletLetters, {
       y: 0,
-      rotateX: 0,
-      rotateZ: 0,
       opacity: 1,
-      filter: 'blur(0px)',
-      scale: 1,
-      duration: 0.6,
-      ease: "back.out(1.7)",
-      stagger: 0.04
+      duration: 0.3,
+      stagger: 0.05,
+      ease: "power2.out"
     }, 0.3);
 
-    // Cyan glow sweep across text
-    timeline.to(allText, {
-      color: "#06b6d4",
-      textShadow: "0 0 20px rgba(6, 182, 212, 0.8)",
-      duration: 0.4,
-      ease: "power2.inOut",
-      stagger: 0.02
-    }, 0.5);
+    // Step 3: "Pay" appears
+    timeline.to(payLetters, {
+      y: 0,
+      opacity: 1,
+      duration: 0.3,
+      stagger: 0.05,
+      ease: "power2.out"
+    }, 0.7);
 
-    // Reset glow slightly
-    timeline.to(allText, {
-      color: "#ffffff",
-      textShadow: "none",
-      duration: 0.4,
-      ease: "power2.inOut"
-    }, 1.0);
+    // Flash / Glow
+    timeline.to(textFullRef.current, {
+      textShadow: "0 0 30px rgba(20, 214, 196, 0.8)",
+      duration: 0.15,
+      yoyo: true,
+      repeat: 1,
+    }, 1.1);
 
-    // Scene 4: Wallet Drop SLAM
-    // Scale from 0, 3D rotate
-    const walletEl = crashRefs.current.walletRef;
-    const trails = crashRefs.current.trailsRef;
-    
-    if (walletEl) {
-      timeline.fromTo(walletEl,
-        { scale: 0, rotationX: 180, rotationY: -90, rotationZ: 45, opacity: 0, z: -1000 },
-        { scale: 2, rotationX: 0, rotationY: 0, rotationZ: 0, opacity: 1, z: 0, duration: 0.7, ease: "expo.in" },
-        0.8 // Start drop at 0.8s
-      );
+    // Step 4: Text shatters + Wallet crashes
+    const impactTime = 1.6;
 
-      // Motion Trails trailing behind
-      trails.forEach((trail, i) => {
-        timeline.fromTo(trail,
-          { scale: 0, rotationX: 180, rotationY: -90, rotationZ: 45, opacity: 0, z: -1000 },
-          { scale: 2, rotationX: 0, rotationY: 0, rotationZ: 0, opacity: 0.5 - (i * 0.15), z: 0, duration: 0.7, ease: "expo.in" },
-          0.8 - (i * 0.04) // Offset trails slightly
-        );
-        // fade them instantly at impact
-        timeline.set(trail, { opacity: 0 }, 1.5);
-      });
-    }
+    // Wallet falling
+    timeline.to(walletRef.current, {
+      y: 0,
+      rotationZ: 0,
+      opacity: 1,
+      scale: 1,
+      duration: 0.3,
+      ease: "power4.in"
+    }, 1.3);
 
-    // IMPACT at exactly 1.5s
-    const impactTime = 1.5;
+    // Impact Flash
+    timeline.to(impactFlashRef.current, {
+      scale: 4,
+      opacity: 1,
+      duration: 0.1,
+    }, impactTime);
+    timeline.to(impactFlashRef.current, {
+      opacity: 0,
+      duration: 0.2,
+    }, impactTime + 0.1);
 
-    // Camera shake
+    // Camera Shake
     timeline.to(containerRef.current, {
-      x: () => Math.random() * 40 - 20,
-      y: () => Math.random() * 40 - 20,
-      duration: 0.05,
-      repeat: 5,
+      x: () => Math.random() * 20 - 10,
+      y: () => Math.random() * 20 - 10,
+      duration: 0.04,
+      repeat: 4,
       yoyo: true,
       ease: "none"
     }, impactTime);
-    timeline.set(containerRef.current, { x: 0, y: 0 }, impactTime + 0.3);
+    timeline.set(containerRef.current, { x: 0, y: 0 }, impactTime + 0.2);
 
-    // Text shattering / physics reaction to the slam
-    timeline.to(wLetters, {
-      y: 100, rotateZ: () => Math.random() * 40 - 20, opacity: 0, filter: "blur(20px)",
-      duration: 0.4, ease: "power4.out", stagger: { amount: 0.1, from: "center" }
+    // Text shatter (simplified: blur and drop)
+    timeline.to([textWRef.current, ...alletLetters, ...payLetters], {
+      y: () => Math.random() * 100 + 50,
+      x: () => Math.random() * 100 - 50,
+      rotationZ: () => Math.random() * 40 - 20,
+      opacity: 0,
+      filter: "blur(10px)",
+      duration: 0.4,
+      ease: "power4.out"
     }, impactTime);
-    
-    timeline.to(pLetters, {
-      y: 100, rotateZ: () => Math.random() * 40 - 20, opacity: 0, filter: "blur(20px)",
-      duration: 0.4, ease: "power4.out", stagger: { amount: 0.1, from: "center" }
-    }, impactTime);
 
-    // Shockwave & Energy
-    const flashEl = crashRefs.current.flashRef;
-    if (flashEl) {
-      timeline.fromTo(flashEl, { opacity: 1 }, { opacity: 0, duration: 0.5, ease: "expo.out" }, impactTime);
-    }
-
-    const ringEl = crashRefs.current.energyRingRef;
-    if (ringEl) {
-      timeline.fromTo(ringEl, 
-        { scale: 0, opacity: 1, borderWidth: "10px" }, 
-        { scale: 30, opacity: 0, borderWidth: "1px", duration: 0.8, ease: "expo.out" }, 
-        impactTime
-      );
-    }
-
-    // Scene 5: Coin Explosion
-    const coins = explosionRefs.current.coinsRef;
-    coins.forEach((coin) => {
+    // Step 5: Coins burst (3.4s - 4.6s)
+    coins.forEach((coin: any, index) => {
       const angle = Math.random() * Math.PI * 2;
-      const forceXY = Math.random() * 1200 + 400; // Violent burst
-      const forceZ = (Math.random() - 0.5) * 2000; // Depth of field
+      const velocity = Math.random() * 800 + 300;
+      const is3D = index % 5 === 0;
+      
+      const tx = Math.cos(angle) * velocity;
+      const ty = Math.sin(angle) * velocity - 200; // bias upward
+      const tz = is3D ? (Math.random() * 1000 + 500) : 0;
+      const scaleMultiplier = is3D ? (Math.random() * 2 + 1.5) : (Math.random() * 0.8 + 0.5);
 
-      const tx = Math.cos(angle) * forceXY;
-      const ty = Math.sin(angle) * forceXY - (Math.random() * 600); // Bias upward initially
+      gsap.set(coin, { opacity: 1 });
 
-      // Depth blur simulation based on Z
-      const blurAmount = Math.abs(forceZ) > 800 ? `${Math.abs(forceZ) / 200}px` : "0px";
-
-      gsap.set(coin, { opacity: 1, x: 0, y: 0, z: 0, scale: 0, filter: `blur(${blurAmount})` });
-
-      // The initial explosive burst outward
       timeline.to(coin, {
         x: tx,
         y: ty,
-        z: forceZ,
-        scale: Math.random() * 0.8 + 0.6,
-        rotationX: Math.random() * 1440 - 720,
-        rotationY: Math.random() * 1440 - 720,
-        rotationZ: Math.random() * 720 - 360,
-        duration: Math.random() * 0.5 + 0.4,
+        z: tz,
+        scale: scaleMultiplier,
+        rotationX: Math.random() * 720,
+        rotationY: Math.random() * 720,
+        rotationZ: Math.random() * 360,
+        duration: Math.random() * 0.4 + 0.3,
         ease: "expo.out"
       }, impactTime);
 
-      // Gravity pulls them down fast
+      // Settle down
       timeline.to(coin, {
-        y: "200vh",
-        duration: Math.random() * 0.8 + 0.5,
+        y: "150vh",
+        opacity: 0,
+        duration: Math.random() * 0.5 + 0.4,
         ease: "power2.in"
-      }, impactTime + 0.3 + (Math.random() * 0.2));
+      }, impactTime + 0.3 + Math.random() * 0.1);
     });
 
-    // Scene 6: Seamless Navbar Reveal transition
-    // The wallet icon smoothly moves up into its final navbar logo position
-    if (walletEl) {
-      timeline.to(walletEl, {
-        scale: 0.6,
-        yPercent: -450, // Approximate navbar height position
-        xPercent: -400, // Move to left
-        rotationX: 0,
-        rotationY: 0,
-        rotationZ: 0,
-        duration: 0.8,
-        ease: "expo.inOut"
-      }, impactTime + 0.5);
-    }
-
-    // Total time is roughly 1.5s (impact) + 0.5s (wait) + 0.8s (wallet transition) = 2.8s total active animation.
-    // Hold for 0.2s then fade out
-    timeline.to({}, { duration: 0.2 });
+    // Hold before fading to Landing Page
+    timeline.to({}, { duration: 0.3 });
 
     tl.current = timeline;
 
@@ -237,50 +190,74 @@ export function IntroAnimation({ onComplete }: IntroAnimationProps) {
   }, [onComplete]);
 
   return (
-    <div className="intro-overlay" ref={containerRef}>
+    <div className="fixed inset-0 z-[200] bg-[#050810] flex items-center justify-center overflow-hidden" ref={containerRef}>
       
-      {/* Light Sweep */}
-      <div className="intro-sweep" ref={sweepRef}></div>
-
-      {/* Ambient Particles */}
-      {Array.from({ length: 30 }).map((_, i) => (
-        <div key={`p-${i}`} className="intro-ambient-particle" style={{
-          width: Math.random() * 3 + 1 + 'px',
-          height: Math.random() * 3 + 1 + 'px',
-          left: Math.random() * 100 + '%',
-          top: Math.random() * 100 + '%',
-          opacity: Math.random() * 0.5 + 0.1,
-          transform: `translate(${Math.random() * 100 - 50}px, ${Math.random() * 100 - 50}px)`
-        }}></div>
-      ))}
-
-      {/* 3D Scene Container */}
-      <div className="intro-scene">
-        
-        {/* Animated Text */}
-        <div className="intro-text-wrapper absolute">
-          <div className="intro-word" ref={textWalletRef}>
-            {walletLetters.map((l, i) => <span key={i} className="intro-letter">{l}</span>)}
-          </div>
-          <div className="intro-word" ref={textPayRef}>
-            {payLetters.map((l, i) => <span key={i} className="intro-letter text-gradient">{l}</span>)}
+      {/* Background stars/particles */}
+      <div className="absolute inset-0 opacity-30 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-primary-900/20 via-[#050810] to-[#050810] pointer-events-none" />
+      
+      {/* Text Container */}
+      <div 
+        ref={textFullRef} 
+        className="absolute z-10 flex items-center gap-4 text-6xl md:text-8xl font-display font-black tracking-tighter"
+      >
+        <div className="flex">
+          <span 
+            ref={textWRef} 
+            className="bg-gradient-to-br from-primary-400 to-accent-400 bg-clip-text text-transparent drop-shadow-xl inline-block"
+          >
+            W
+          </span>
+          <div ref={textAlletRef} className="flex">
+            {"allet".split('').map((l, i) => (
+              <span key={i} className="bg-gradient-to-br from-primary-400 to-accent-400 bg-clip-text text-transparent inline-block">
+                {l}
+              </span>
+            ))}
           </div>
         </div>
+        <div ref={textPayRef} className="flex">
+          {"Pay".split('').map((l, i) => (
+            <span key={i} className="bg-gradient-to-br from-accent-400 to-teal-400 bg-clip-text text-transparent inline-block">
+              {l}
+            </span>
+          ))}
+        </div>
+      </div>
 
-        {/* The crash effects & wallet */}
-        <WalletCrash ref={crashRefs} />
+      {/* Wallet Icon Crash */}
+      <div 
+        ref={walletRef}
+        className="absolute z-20 w-32 h-32 md:w-48 md:h-48 bg-gradient-to-br from-primary-500 to-teal-500 rounded-3xl shadow-[0_0_60px_rgba(59,130,246,0.6)] flex items-center justify-center border-t border-white/20"
+      >
+        <Wallet className="w-16 h-16 md:w-24 md:h-24 text-white drop-shadow-lg" />
+      </div>
 
-        {/* The 150+ Coins */}
-        <CoinExplosion ref={explosionRefs} count={150} />
+      {/* Impact Flash */}
+      <div 
+        ref={impactFlashRef}
+        className="absolute z-30 w-32 h-32 bg-white rounded-full blur-2xl pointer-events-none mix-blend-screen"
+      />
+
+      {/* Coins Container */}
+      <div ref={coinsContainerRef} className="absolute inset-0 z-15 flex items-center justify-center pointer-events-none perspective-[1000px]">
+        {Array.from({ length: 60 }).map((_, i) => (
+          <div 
+            key={i} 
+            className="absolute w-8 h-8 rounded-full bg-gradient-to-br from-[#F5C542] to-[#B8860B] shadow-[inset_0_-2px_4px_rgba(0,0,0,0.3),_0_4px_8px_rgba(0,0,0,0.5)] border border-[#FFD700]/50 flex items-center justify-center"
+          >
+            <div className="w-5 h-5 rounded-full border border-black/10 flex items-center justify-center text-[#B8860B] font-bold text-xs">
+              $
+            </div>
+          </div>
+        ))}
       </div>
 
       <button 
-        className={`intro-skip-btn ${showSkip ? 'visible' : ''}`}
+        className={`absolute bottom-8 right-8 px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white/70 hover:text-white transition-all text-sm backdrop-blur-sm ${showSkip ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={handleSkip}
       >
         Skip Intro
       </button>
-
     </div>
   );
 }

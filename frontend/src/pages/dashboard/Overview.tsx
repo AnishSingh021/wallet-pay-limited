@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle, CardDescription } from '../../components/u
 import { Badge } from '../../components/ui/Badge';
 import { SkeletonCard } from '../../components/ui/Skeleton';
 import { Button } from '../../components/ui/Button';
+import { NotificationsPopover } from '../../components/NotificationsPopover';
 import { Zap, Flame, Award, CalendarCheck, TrendingUp, ExternalLink, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { ActivityCalendar } from 'react-activity-calendar';
@@ -81,6 +82,9 @@ export function DashboardOverview() {
             Welcome back, {user?.displayName.split(' ')[0]}!
           </h1>
           <p className="text-surface-600 mt-1">Here's your summary for today.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <NotificationsPopover />
         </div>
       </header>
 

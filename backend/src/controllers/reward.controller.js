@@ -1,5 +1,6 @@
 const RewardHistory = require('../models/RewardHistory');
 const User = require('../models/User');
+const Notification = require('../models/Notification');
 const { PAGINATION } = require('../config/constants');
 
 /**
@@ -135,6 +136,13 @@ const adminCreate = async (req, res) => {
     awardedAt: new Date(),
   });
 
+  await Notification.create({
+    userId,
+    title: 'New Reward Issued',
+    message: `Congratulations! You have received a new reward of ₹${amount} for ${period}.`,
+    type: 'reward_issued',
+  });
+
   res.status(201).json({
     success: true,
     message: `Reward of ₹${amount} created for ${user.displayName}.`,
@@ -184,6 +192,13 @@ const adminPayReward = async (req, res) => {
   if (!reward) {
     return res.status(404).json({ success: false, message: 'Reward not found.' });
   }
+
+  await Notification.create({
+    userId: reward.userId._id,
+    title: 'Reward Paid',
+    message: `Great news! Your reward of ₹${reward.amount} has been successfully paid.`,
+    type: 'reward_paid',
+  });
 
   res.json({
     success: true,
