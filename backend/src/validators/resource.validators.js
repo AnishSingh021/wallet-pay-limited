@@ -24,7 +24,8 @@ const markAttendanceSchema = z.object({
 });
 
 const attendanceOverrideSchema = z.object({
-  userId: z.string().min(1, 'User ID is required'),
+  userId: z.string().min(1).optional(),
+  userIds: z.array(z.string().min(1)).optional(),
   date: z.string().min(1, 'Date is required'),
   status: z.enum(['present', 'absent', 'leave'], {
     errorMap: () => ({ message: 'Status must be present, absent, or leave' }),

@@ -169,6 +169,89 @@ const adminGetAll = async (req, res) => {
   const pageNum = Math.max(1, parseInt(page));
   const limitNum = Math.min(parseInt(limit) || PAGINATION.DEFAULT_LIMIT, PAGINATION.MAX_LIMIT);
 
+  // If a specific date is requested (like today or yesterday), use aggregation to list all users
+  if (date && !userId && !startDate && !endDate) {
+    const targetDate = normalizeDate(date);
+    
+    const pipeline = [];
+    
+    if (department) {
+      pipeline.push({ $match: { department } });
+    }
+
+    pipeline.push({
+      $lookup: {
+        from: 'attendances',
+        let: { uId: '$_id' },
+        pipeline: [
+          { $match: { 
+              $expr: { 
+                $and: [
+                  { $eq: ['$userId', '$$uId'] },
+                  { $eq: ['$date', targetDate] }
+                ]
+              }
+            } 
+          }
+        ],
+        as: 'attendance'
+      }
+    });
+
+    pipeline.push({
+      $unwind: {
+        path: '$attendance',
+        preserveNullAndEmptyArrays: true
+      }
+    });
+
+    pipeline.push({
+      $project: {
+        _id: { $ifNull: ['$attendance._id', { $concat: ['unmarked-', { $toString: '$_id' }] }] },
+        userId: {
+          _id: '$_id',
+          displayName: '$displayName',
+          email: '$email',
+          photoURL: '$photoURL'
+        },
+        date: { $ifNull: ['$attendance.date', targetDate] },
+        status: { $ifNull: ['$attendance.status', 'unmarked'] },
+        markedAt: '$attendance.markedAt',
+        markedBy: '$attendance.markedBy'
+      }
+    });
+
+    if (status) {
+      pipeline.push({ $match: { status } });
+    }
+
+    // Sort by displayName
+    pipeline.push({ $sort: { 'userId.displayName': 1 } });
+
+    const facet = {
+      metadata: [ { $count: 'total' } ],
+      data: [ { $skip: (pageNum - 1) * limitNum }, { $limit: limitNum } ]
+    };
+    pipeline.push({ $facet: facet });
+
+    const result = await User.aggregate(pipeline);
+    const records = result[0].data;
+    const total = result[0].metadata[0] ? result[0].metadata[0].total : 0;
+
+    await User.populate(records, { path: 'markedBy', select: 'displayName', model: 'User' });
+
+    return res.json({
+      success: true,
+      data: records,
+      pagination: {
+        page: pageNum,
+        limit: limitNum,
+        total,
+        pages: Math.ceil(total / limitNum),
+      },
+    });
+  }
+
   const filter = {};
   if (status) filter.status = status;
   
@@ -178,9 +261,7 @@ const adminGetAll = async (req, res) => {
     filter.userId = { $in: usersInDept.map(u => u._id) };
   }
 
-  if (date) {
-    filter.date = normalizeDate(date);
-  } else if (startDate || endDate) {
+  if (startDate || endDate) {
     filter.date = {};
     if (startDate) filter.date.$gte = normalizeDate(startDate);
     if (endDate) filter.date.$lte = normalizeDate(endDate);
