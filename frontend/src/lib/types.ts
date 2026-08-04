@@ -16,6 +16,15 @@ export interface User {
   rewardEligible: boolean;
   isApproved: boolean;
   isActive: boolean;
+  department?: string;
+  paymentMethod?: 'NONE' | 'UPI' | 'QR' | 'BANK';
+  upiId?: string;
+  bankName?: string;
+  accountNumber?: string;
+  ifsc?: string;
+  accountHolder?: string;
+  qrImage?: string;
+  paymentStatus?: 'None' | 'Pending' | 'Verified' | 'Rejected';
   createdAt: string;
   updatedAt: string;
 }
@@ -60,6 +69,11 @@ export interface RewardHistory {
   status: RewardStatus;
   awardedAt: string;
   note: string;
+  reason?: string;
+  paymentStatus?: 'Pending' | 'Paid' | 'Failed';
+  paymentMethod?: string;
+  transactionId?: string;
+  paymentDate?: string;
   createdAt: string;
   updatedAt: string;
 }
