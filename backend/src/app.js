@@ -66,6 +66,10 @@ app.use('/api/rewards', rewardRoutes);
 app.use('/api/announcements', announcementRoutes);
 app.use('/api/documents', documentRoutes);
 
+// Import and mount payment routes
+const paymentRoutes = require('./routes/payment.routes');
+app.use('/api/payment', paymentRoutes);
+
 // ── 404 Handler ──
 app.use((req, res) => {
   res.status(404).json({

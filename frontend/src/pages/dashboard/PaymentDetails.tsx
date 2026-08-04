@@ -62,7 +62,7 @@ export function PaymentDetails() {
       if (method === 'QR' && qrFile) {
         const formData = new FormData();
         formData.append('photo', qrFile);
-        const uploadRes = await api.post('/users/me/payment/qr', formData, {
+        const uploadRes = await api.post('/payment/upload-qr', formData, {
           headers: { 'Content-Type': 'multipart/form-data' },
         });
         if (uploadRes.data.success) {
@@ -98,6 +98,14 @@ export function PaymentDetails() {
         <div className="flex items-center gap-2 p-4 bg-success-500/10 text-success-600 rounded-xl border border-success-500/20">
           <CheckCircle2 className="w-5 h-5" />
           <p className="text-sm font-medium">Your payment details are verified and ready for payouts.</p>
+        </div>
+      );
+    }
+    if (status === 'Paid') {
+      return (
+        <div className="flex items-center gap-2 p-4 bg-primary-500/10 text-primary-600 rounded-xl border border-primary-500/20">
+          <CheckCircle2 className="w-5 h-5" />
+          <p className="text-sm font-medium">Your payout has been processed successfully.</p>
         </div>
       );
     }
@@ -185,7 +193,15 @@ export function PaymentDetails() {
               >
                 {qrPreview ? (
                   <div className="flex flex-col items-center gap-4">
-                    <img src={qrPreview.startsWith('blob:') ? qrPreview : `http://localhost:5000${qrPreview}`} alt="QR Preview" className="w-48 h-48 object-contain rounded-lg shadow-md bg-white p-2" />
+                    <img 
+                      src={
+                        qrPreview.startsWith('blob:') || qrPreview.startsWith('http')
+                          ? qrPreview 
+                          : `http://localhost:5000${qrPreview}`
+                      } 
+                      alt="QR Preview" 
+                      className="w-48 h-48 object-contain rounded-lg shadow-md bg-white p-2" 
+                    />
                     <Button type="button" variant="secondary" size="sm" onClick={() => fileInputRef.current?.click()}>
                       Change Image
                     </Button>

@@ -24,7 +24,7 @@ export interface User {
   ifsc?: string;
   accountHolder?: string;
   qrImage?: string;
-  paymentStatus?: 'None' | 'Pending' | 'Verified' | 'Rejected';
+  paymentStatus?: 'None' | 'Pending' | 'Verified' | 'Rejected' | 'Paid';
   createdAt: string;
   updatedAt: string;
 }

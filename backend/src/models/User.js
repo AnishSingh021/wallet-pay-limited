@@ -80,7 +80,7 @@ const userSchema = new mongoose.Schema(
     accountHolder: { type: String, trim: true, default: '' },
     
     paymentVerified: { type: Boolean, default: false },
-    paymentStatus: { type: String, enum: ['Pending', 'Verified', 'Rejected', 'None'], default: 'None' },
+    paymentStatus: { type: String, enum: ['Pending', 'Verified', 'Rejected', 'None', 'Paid'], default: 'None' },
     paymentUpdatedAt: { type: Date },
 
     // ── Refresh Token (single-device approach) ──

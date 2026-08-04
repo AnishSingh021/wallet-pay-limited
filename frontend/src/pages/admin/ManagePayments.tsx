@@ -43,13 +43,24 @@ export function ManagePayments() {
     toast.success('Copied to clipboard!');
   };
 
-  const handleDownloadQR = (qrUrl: string, name: string) => {
-    const link = document.createElement('a');
-    link.href = `http://localhost:5000${qrUrl}`;
-    link.download = `${name}-QR.png`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const handleDownloadQR = async (qrUrl: string, name: string) => {
+    const fullUrl = qrUrl.startsWith('http') ? qrUrl : `http://localhost:5000${qrUrl}`;
+    
+    try {
+      const response = await fetch(fullUrl);
+      const blob = await response.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      
+      const link = document.createElement('a');
+      link.href = objectUrl;
+      link.download = `${name}-QR.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(objectUrl);
+    } catch (error) {
+      toast.error('Failed to download image');
+    }
   };
 
   const filteredUsers = (users || []).filter((u: any) => 
@@ -121,7 +132,12 @@ export function ManagePayments() {
                       )}
                       {user.paymentMethod === 'QR' && user.qrImage && (
                         <div className="flex items-center gap-2">
-                          <img src={`http://localhost:5000${user.qrImage}`} alt="QR" className="w-10 h-10 object-cover rounded bg-white shadow-sm cursor-pointer" onClick={() => setQrModal(`http://localhost:5000${user.qrImage}`)} />
+                          <img 
+                            src={user.qrImage.startsWith('http') ? user.qrImage : `http://localhost:5000${user.qrImage}`} 
+                            alt="QR" 
+                            className="w-10 h-10 object-cover rounded bg-white shadow-sm cursor-pointer" 
+                            onClick={() => setQrModal(user.qrImage.startsWith('http') ? user.qrImage : `http://localhost:5000${user.qrImage}`)} 
+                          />
                           <button onClick={() => handleDownloadQR(user.qrImage, user.displayName)} className="text-surface-400 hover:text-primary-500 transition-colors">
                             <Download className="w-4 h-4" />
                           </button>
@@ -138,6 +154,8 @@ export function ManagePayments() {
                     <td className="px-6 py-4">
                       {user.paymentStatus === 'Verified' ? (
                         <Badge variant="success">Verified</Badge>
+                      ) : user.paymentStatus === 'Paid' ? (
+                        <Badge variant="primary">Paid</Badge>
                       ) : user.paymentStatus === 'Rejected' ? (
                         <Badge variant="danger">Rejected</Badge>
                       ) : (
@@ -145,13 +163,18 @@ export function ManagePayments() {
                       )}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="flex gap-2">
-                        {user.paymentStatus !== 'Verified' && (
+                      <div className="flex gap-2 flex-wrap">
+                        {user.paymentStatus !== 'Verified' && user.paymentStatus !== 'Paid' && (
                           <Button size="sm" variant="secondary" className="text-success-600 hover:text-success-700 hover:bg-success-50" onClick={() => verifyMutation.mutate({ userId: user._id, status: 'Verified' })} isLoading={verifyMutation.isPending}>
                             Approve
                           </Button>
                         )}
-                        {user.paymentStatus !== 'Rejected' && (
+                        {user.paymentStatus === 'Verified' && (
+                          <Button size="sm" variant="primary" onClick={() => verifyMutation.mutate({ userId: user._id, status: 'Paid' })} isLoading={verifyMutation.isPending}>
+                            Mark Paid
+                          </Button>
+                        )}
+                        {user.paymentStatus !== 'Rejected' && user.paymentStatus !== 'Paid' && (
                           <Button size="sm" variant="ghost" className="text-danger-600 hover:bg-danger-50" onClick={() => verifyMutation.mutate({ userId: user._id, status: 'Rejected' })} isLoading={verifyMutation.isPending}>
                             Reject
                           </Button>

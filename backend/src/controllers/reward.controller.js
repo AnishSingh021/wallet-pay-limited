@@ -177,7 +177,7 @@ const adminPayReward = async (req, res) => {
 
   const reward = await RewardHistory.findByIdAndUpdate(
     req.params.id,
-    { paymentStatus: 'Paid', paymentDate: new Date(), transactionId: transactionId || '' },
+    { status: 'paid', paymentStatus: 'Paid', paymentDate: new Date(), transactionId: transactionId || '' },
     { new: true, runValidators: true }
   ).populate('userId', 'displayName email');
 

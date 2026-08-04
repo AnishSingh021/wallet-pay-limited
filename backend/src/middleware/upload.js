@@ -1,6 +1,8 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+const cloudinary = require('../config/cloudinary');
 
 // Ensure uploads subdirectories exist
 const ensureDir = (dir) => {
@@ -9,7 +11,7 @@ const ensureDir = (dir) => {
   }
 };
 
-// ── Storage Configuration ──
+// ── Local Storage Configuration ──
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     // Determine subdirectory based on route
@@ -28,6 +30,26 @@ const storage = multer.diskStorage({
     const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
     const ext = path.extname(file.originalname);
     cb(null, `${uniqueSuffix}${ext}`);
+  },
+});
+
+// ── Cloudinary Storage Configuration for QR ──
+const cloudinaryStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: async (req, file) => {
+    const allowed = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+    if (!allowed.includes(file.mimetype)) {
+      throw new Error('Only image files (JPEG, PNG, WebP) are allowed.');
+    }
+    
+    // Fixed public_id to automatically overwrite existing user's QR
+    const publicId = `qr_${req.user.id}`;
+    
+    return {
+      folder: 'wallet-pay/qr',
+      public_id: publicId,
+      allowed_formats: ['jpeg', 'jpg', 'png', 'webp']
+    };
   },
 });
 
@@ -67,4 +89,9 @@ const uploadDocument = multer({
   limits: { fileSize: parseInt(process.env.MAX_FILE_SIZE) || 10 * 1024 * 1024 }, // 10MB
 }).single('file');
 
-module.exports = { uploadPhoto, uploadDocument };
+const uploadQRCloudinary = multer({
+  storage: cloudinaryStorage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+}).single('photo');
+
+module.exports = { uploadPhoto, uploadDocument, uploadQRCloudinary };

@@ -7,11 +7,17 @@
     "start": "node server.js",
     "dev": "node --watch server.js"
   },
-  "keywords": ["walletpay", "attendance", "rewards", "employee"],
+  "keywords": [
+    "walletpay",
+    "attendance",
+    "rewards",
+    "employee"
+  ],
   "author": "Wallet Pay",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "cloudinary": "^1.41.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
@@ -21,6 +27,7 @@
     "mongoose": "^9.9.1",
     "morgan": "^1.11.0",
     "multer": "^2.2.0",
+    "multer-storage-cloudinary": "^4.0.0",
     "zod": "^4.4.3"
   }
 }

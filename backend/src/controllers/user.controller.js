@@ -198,14 +198,14 @@ const listPaymentDetails = async (req, res) => {
  * @access  Admin
  */
 const verifyPaymentDetails = async (req, res) => {
-  const { status } = req.body; // 'Verified' or 'Rejected'
-  if (!['Verified', 'Rejected'].includes(status)) {
+  const { status } = req.body; // 'Verified', 'Rejected', or 'Paid'
+  if (!['Verified', 'Rejected', 'Paid'].includes(status)) {
     return res.status(400).json({ success: false, message: 'Invalid status' });
   }
 
   const user = await User.findByIdAndUpdate(
     req.params.id,
-    { paymentStatus: status, paymentVerified: status === 'Verified' },
+    { paymentStatus: status, paymentVerified: ['Verified', 'Paid'].includes(status) },
     { new: true }
   );
 
