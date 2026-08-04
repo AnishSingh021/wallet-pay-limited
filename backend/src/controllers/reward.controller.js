@@ -167,4 +167,29 @@ const adminUpdateStatus = async (req, res) => {
   });
 };
 
-module.exports = { getHistory, adminGetAll, adminCreate, adminUpdateStatus };
+/**
+ * @desc    Mark reward as Paid (admin)
+ * @route   PUT /api/rewards/admin/pay/:id
+ * @access  Admin
+ */
+const adminPayReward = async (req, res) => {
+  const { transactionId } = req.body;
+
+  const reward = await RewardHistory.findByIdAndUpdate(
+    req.params.id,
+    { paymentStatus: 'Paid', paymentDate: new Date(), transactionId: transactionId || '' },
+    { new: true, runValidators: true }
+  ).populate('userId', 'displayName email');
+
+  if (!reward) {
+    return res.status(404).json({ success: false, message: 'Reward not found.' });
+  }
+
+  res.json({
+    success: true,
+    message: `Reward payment marked as Paid.`,
+    data: reward,
+  });
+};
+
+module.exports = { getHistory, adminGetAll, adminCreate, adminUpdateStatus, adminPayReward };

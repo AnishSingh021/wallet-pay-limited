@@ -145,4 +145,75 @@ const rejectUser = async (req, res) => {
   res.json({ success: true, message: 'User rejected.', data: user });
 };
 
-module.exports = { getProfile, updateProfile, listUsers, approveUser, rejectUser };
+/**
+ * @desc    Update current user's payment details
+ * @route   PUT /api/users/me/payment
+ * @access  Auth
+ */
+const updatePaymentDetails = async (req, res) => {
+  const { paymentMethod, upiId, bankName, accountNumber, ifsc, accountHolder, qrImage } = req.body;
+  const updateData = { paymentMethod, paymentStatus: 'Pending', paymentUpdatedAt: new Date() };
+
+  if (paymentMethod === 'UPI') updateData.upiId = upiId;
+  if (paymentMethod === 'BANK') {
+    updateData.bankName = bankName;
+    updateData.accountNumber = accountNumber;
+    updateData.ifsc = ifsc;
+    updateData.accountHolder = accountHolder;
+  }
+  if (paymentMethod === 'QR' && qrImage) {
+    updateData.qrImage = qrImage;
+  }
+
+  const user = await User.findByIdAndUpdate(req.user.id, updateData, { new: true, runValidators: true });
+  res.json({ success: true, message: 'Payment details updated.', data: user });
+};
+
+/**
+ * @desc    Upload QR Image
+ * @route   POST /api/users/me/payment/qr
+ * @access  Auth
+ */
+const uploadQRImage = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ success: false, message: 'No image uploaded.' });
+  }
+  const qrImage = `/uploads/qr/${req.file.filename}`;
+  res.json({ success: true, message: 'QR Image uploaded.', data: { qrImage } });
+};
+
+/**
+ * @desc    List users with their payment details (Admin)
+ * @route   GET /api/users/admin/payments
+ * @access  Admin
+ */
+const listPaymentDetails = async (req, res) => {
+  const users = await User.find({ paymentMethod: { $ne: 'NONE' } }).sort({ paymentUpdatedAt: -1 });
+  res.json({ success: true, data: users });
+};
+
+/**
+ * @desc    Verify/Approve/Reject user payment details (Admin)
+ * @route   PUT /api/users/:id/payment/verify
+ * @access  Admin
+ */
+const verifyPaymentDetails = async (req, res) => {
+  const { status } = req.body; // 'Verified' or 'Rejected'
+  if (!['Verified', 'Rejected'].includes(status)) {
+    return res.status(400).json({ success: false, message: 'Invalid status' });
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.params.id,
+    { paymentStatus: status, paymentVerified: status === 'Verified' },
+    { new: true }
+  );
+
+  if (!user) return res.status(404).json({ success: false, message: 'User not found.' });
+  res.json({ success: true, message: `Payment details ${status.toLowerCase()}.`, data: user });
+};
+
+module.exports = { 
+  getProfile, updateProfile, listUsers, approveUser, rejectUser,
+  updatePaymentDetails, uploadQRImage, listPaymentDetails, verifyPaymentDetails
+};

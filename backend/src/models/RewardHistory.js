@@ -33,6 +33,29 @@ const rewardHistorySchema = new mongoose.Schema(
       trim: true,
       default: '',
     },
+    reason: {
+      type: String,
+      trim: true,
+      default: 'Reward Earned',
+    },
+    paymentStatus: {
+      type: String,
+      enum: ['Pending', 'Paid', 'Failed'],
+      default: 'Pending',
+    },
+    paymentMethod: {
+      type: String,
+      default: 'NONE',
+    },
+    paymentDate: {
+      type: Date,
+      default: null,
+    },
+    transactionId: {
+      type: String,
+      trim: true,
+      default: '',
+    },
   },
   {
     timestamps: true,

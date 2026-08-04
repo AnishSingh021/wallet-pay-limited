@@ -67,6 +67,22 @@ const userSchema = new mongoose.Schema(
     isApproved: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
 
+    // ── Department ──
+    department: { type: String, default: 'General' },
+
+    // ── Payment Details ──
+    paymentMethod: { type: String, enum: ['UPI', 'QR', 'BANK', 'NONE'], default: 'NONE' },
+    upiId: { type: String, trim: true, default: '' },
+    qrImage: { type: String, default: '' }, // URL or path
+    bankName: { type: String, trim: true, default: '' },
+    accountNumber: { type: String, trim: true, default: '' },
+    ifsc: { type: String, trim: true, default: '' },
+    accountHolder: { type: String, trim: true, default: '' },
+    
+    paymentVerified: { type: Boolean, default: false },
+    paymentStatus: { type: String, enum: ['Pending', 'Verified', 'Rejected', 'None'], default: 'None' },
+    paymentUpdatedAt: { type: Date },
+
     // ── Refresh Token (single-device approach) ──
     refreshToken: {
       type: String,

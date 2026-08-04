@@ -1,17 +1,34 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { Wallet, Menu } from 'lucide-react';
 import { Button } from '../components/ui/Button';
+import { motion } from 'framer-motion';
 
 export function PublicLayout() {
   const location = useLocation();
   const isLoginPage = location.pathname === '/login';
   const isSignupPage = location.pathname === '/signup';
+  const [introFinished, setIntroFinished] = useState(() => {
+    return localStorage.getItem('hasSeenIntro_walletPay') === 'true';
+  });
+
+  useEffect(() => {
+    const handleIntroComplete = () => {
+      setIntroFinished(true);
+    };
+    window.addEventListener('introComplete', handleIntroComplete);
+    return () => window.removeEventListener('introComplete', handleIntroComplete);
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col bg-surface-0">
-      <header className="sticky top-0 z-40 glass w-full border-b border-surface-300">
+      <motion.header 
+        className="sticky top-0 z-40 glass w-full border-b border-surface-300"
+        initial={{ y: introFinished ? 0 : -100, opacity: introFinished ? 1 : 0 }}
+        animate={introFinished ? { y: 0, opacity: 1 } : { y: -100, opacity: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-2">
@@ -48,7 +65,7 @@ export function PublicLayout() {
             </div>
           </div>
         </div>
-      </header>
+      </motion.header>
 
       <main className="flex-grow flex flex-col">
         <Outlet />

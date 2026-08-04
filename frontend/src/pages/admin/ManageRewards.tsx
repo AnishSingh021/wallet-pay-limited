@@ -11,11 +11,14 @@ import { Avatar } from '../../components/ui/Avatar';
 import { Gift, Plus } from 'lucide-react';
 import api from '../../lib/axios';
 import { RewardHistory, User } from '../../lib/types';
+import toast from 'react-hot-toast';
 
 export function ManageRewards() {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState('');
+  const [payModal, setPayModal] = useState<string | null>(null);
+  const [transactionId, setTransactionId] = useState('');
   
   // New Reward Form State
   const [formData, setFormData] = useState({
@@ -58,6 +61,17 @@ export function ManageRewards() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'rewards'] });
+    },
+  });
+
+  const payMutation = useMutation({
+    mutationFn: async ({ id, transactionId }: { id: string, transactionId: string }) => {
+      await api.put(`/rewards/admin/pay/${id}`, { transactionId });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'rewards'] });
+      setPayModal(null);
+      toast.success('Reward marked as paid');
     },
   });
 
@@ -147,18 +161,26 @@ export function ManageRewards() {
                         </Badge>
                       </td>
                       <td className="px-6 py-4 text-right">
-                        <Select
-                          size="sm"
-                          value={reward.status}
-                          onChange={(e) => updateStatusMutation.mutate({ id: reward._id, status: e.target.value })}
-                          options={[
-                            { value: 'pending', label: 'Set Pending' },
-                            { value: 'processing', label: 'Set Processing' },
-                            { value: 'paid', label: 'Mark as Paid' },
-                            { value: 'rejected', label: 'Reject' },
-                          ]}
-                          className="w-36 inline-block text-left"
-                        />
+                        <div className="flex justify-end gap-2">
+                          <Select
+                            size="sm"
+                            value={reward.status}
+                            onChange={(e) => {
+                              if (e.target.value === 'paid') {
+                                setPayModal(reward._id);
+                              } else {
+                                updateStatusMutation.mutate({ id: reward._id, status: e.target.value });
+                              }
+                            }}
+                            options={[
+                              { value: 'pending', label: 'Set Pending' },
+                              { value: 'processing', label: 'Set Processing' },
+                              { value: 'paid', label: 'Mark as Paid' },
+                              { value: 'rejected', label: 'Reject' },
+                            ]}
+                            className="w-36 inline-block text-left"
+                          />
+                        </div>
                       </td>
                     </tr>
                   );
@@ -210,6 +232,21 @@ export function ManageRewards() {
           <div className="pt-4 flex justify-end gap-3">
             <Button variant="ghost" type="button" onClick={() => setIsModalOpen(false)}>Cancel</Button>
             <Button type="submit" isLoading={createMutation.isPending}>Create Reward</Button>
+          </div>
+        </form>
+      </Modal>
+
+      <Modal isOpen={!!payModal} onClose={() => { setPayModal(null); setTransactionId(''); }} title="Mark as Paid">
+        <form onSubmit={(e) => { e.preventDefault(); if (payModal) payMutation.mutate({ id: payModal, transactionId }); }} className="space-y-4">
+          <Input
+            label="Transaction ID (Optional)"
+            placeholder="e.g. UPI Ref / NEFT UTR"
+            value={transactionId}
+            onChange={(e) => setTransactionId(e.target.value)}
+          />
+          <div className="pt-4 flex justify-end gap-3">
+            <Button variant="ghost" type="button" onClick={() => { setPayModal(null); setTransactionId(''); }}>Cancel</Button>
+            <Button type="submit" isLoading={payMutation.isPending}>Confirm Payment</Button>
           </div>
         </form>
       </Modal>

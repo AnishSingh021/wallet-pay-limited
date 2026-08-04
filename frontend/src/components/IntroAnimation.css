@@ -1,0 +1,144 @@
+.intro-container {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background-color: #000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  perspective: 1000px;
+}
+
+.intro-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(0, 150, 255, 0.6);
+  box-shadow: 0 0 10px rgba(0, 150, 255, 0.8);
+  pointer-events: none;
+}
+
+.intro-text-container {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-size: 5rem;
+  font-weight: 800;
+  color: white;
+  font-family: 'Inter', system-ui, sans-serif;
+  z-index: 10;
+  perspective: 500px;
+}
+
+.intro-word {
+  display: flex;
+}
+
+.intro-letter {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(50px);
+  will-change: transform, opacity;
+  text-shadow: 0 0 20px rgba(0, 150, 255, 0.5);
+}
+
+.intro-wallet-drop {
+  position: absolute;
+  top: -200px;
+  width: 120px;
+  height: 120px;
+  z-index: 20;
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+.intro-wallet-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.8));
+}
+
+.intro-energy-explosion {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  background: cyan;
+  border-radius: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  opacity: 0;
+  box-shadow: 0 0 100px 50px cyan, 0 0 200px 100px blue;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.intro-gold-coin {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background: radial-gradient(circle at 30% 30%, #ffd700, #b8860b);
+  border-radius: 50%;
+  box-shadow: 
+    inset 0 0 5px rgba(255, 255, 255, 0.8),
+    0 5px 15px rgba(0, 0, 0, 0.5);
+  border: 2px solid #daa520;
+  z-index: 15;
+  will-change: transform;
+  pointer-events: none;
+  transform-style: preserve-3d;
+}
+
+.intro-gold-coin::after {
+  content: '$';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #b8860b;
+  font-weight: bold;
+  font-size: 16px;
+  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.5);
+}
+
+.intro-skip-btn {
+  position: absolute;
+  bottom: 40px;
+  right: 40px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.6);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  z-index: 100;
+  transition: all 0.3s ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.intro-skip-btn.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.intro-skip-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+}
+
+@media (max-width: 768px) {
+  .intro-text-container {
+    font-size: 3rem;
+    flex-direction: column;
+    gap: 0;
+  }
+  .intro-wallet-drop {
+    width: 80px;
+    height: 80px;
+  }
+}

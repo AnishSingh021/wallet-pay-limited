@@ -16,7 +16,9 @@ import {
   Menu,
   Shield,
   User as UserIcon,
-  X
+  X,
+  CreditCard,
+  Banknote
 } from 'lucide-react';
 
 export function DashboardLayout() {
@@ -32,14 +34,17 @@ export function DashboardLayout() {
     { name: 'Attendance', href: '/app/attendance', icon: CalendarCheck },
     { name: 'Rewards', href: '/app/rewards', icon: Gift },
     { name: 'Announcements', href: '/app/announcements', icon: Bell },
+    { name: 'Payment Details', href: '/app/payment', icon: CreditCard },
     { name: 'Profile', href: '/app/profile', icon: UserIcon },
   ];
 
   const adminNav = [
     { name: 'Admin Hub', href: '/admin', icon: Shield },
     { name: 'Members', href: '/admin/members', icon: Users },
-    { name: 'Approvals', href: '/admin/approvals', icon: CalendarCheck },
-    { name: 'Manage Rewards', href: '/admin/rewards', icon: Gift },
+    { name: 'Attendance Mgmt', href: '/admin/attendance', icon: CalendarCheck },
+    { name: 'Approvals', href: '/admin/approvals', icon: Users },
+    { name: 'Rewards', href: '/admin/rewards', icon: Gift },
+    { name: 'Payment Mgmt', href: '/admin/payments', icon: Banknote },
     { name: 'Announcements', href: '/admin/announcements', icon: Bell },
     { name: 'Documents', href: '/admin/documents', icon: FileText },
   ];

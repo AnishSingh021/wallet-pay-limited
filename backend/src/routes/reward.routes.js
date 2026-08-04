@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getHistory, adminGetAll, adminCreate, adminUpdateStatus } = require('../controllers/reward.controller');
+const { getHistory, adminGetAll, adminCreate, adminUpdateStatus, adminPayReward } = require('../controllers/reward.controller');
 const { authenticate } = require('../middleware/auth');
 const { requireRole } = require('../middleware/roles');
 const { validate } = require('../middleware/validate');
@@ -22,5 +22,8 @@ router.post('/admin/create', authenticate, requireRole(ROLES.ADMIN), validate({ 
 
 // PATCH /api/rewards/admin/:id/status — Update reward status
 router.patch('/admin/:id/status', authenticate, requireRole(ROLES.ADMIN), validate({ body: updateRewardStatusSchema, params: mongoIdParamSchema }), adminUpdateStatus);
+
+// PUT /api/rewards/admin/pay/:id — Mark reward as Paid
+router.put('/admin/pay/:id', authenticate, requireRole(ROLES.ADMIN), adminPayReward);
 
 module.exports = router;

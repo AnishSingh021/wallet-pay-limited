@@ -72,37 +72,39 @@ export function RewardsPage() {
               <thead className="bg-surface-200 text-surface-600 uppercase">
                 <tr>
                   <th className="px-6 py-3 font-semibold">Date</th>
-                  <th className="px-6 py-3 font-semibold">Period</th>
+                  <th className="px-6 py-3 font-semibold">Reason</th>
                   <th className="px-6 py-3 font-semibold">Amount</th>
                   <th className="px-6 py-3 font-semibold">Status</th>
-                  <th className="px-6 py-3 font-semibold">Note</th>
+                  <th className="px-6 py-3 font-semibold">Method</th>
+                  <th className="px-6 py-3 font-semibold">Transaction ID</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-surface-200">
-                {rewards.map((reward) => (
+                {rewards.map((reward: any) => (
                   <tr key={reward._id} className="hover:bg-surface-150 transition-colors">
                     <td className="px-6 py-4 text-surface-600">
                       {new Date(reward.awardedAt).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4 font-medium text-surface-900">
-                      {reward.period}
+                      {reward.reason || reward.period}
                     </td>
                     <td className="px-6 py-4 font-display font-bold text-surface-900">
                       ₹{reward.amount.toLocaleString()}
                     </td>
                     <td className="px-6 py-4">
-                      {reward.status === 'paid' ? (
+                      {reward.paymentStatus === 'Paid' ? (
                         <Badge variant="success">Paid</Badge>
-                      ) : reward.status === 'processing' ? (
-                        <Badge variant="primary">Processing</Badge>
-                      ) : reward.status === 'rejected' ? (
-                        <Badge variant="danger">Rejected</Badge>
+                      ) : reward.paymentStatus === 'Failed' ? (
+                        <Badge variant="danger">Failed</Badge>
                       ) : (
                         <Badge variant="warning">Pending</Badge>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-surface-600">
-                      {reward.note || '-'}
+                    <td className="px-6 py-4 text-surface-600 font-medium">
+                      {reward.paymentMethod || '-'}
+                    </td>
+                    <td className="px-6 py-4 text-surface-500 font-mono text-xs">
+                      {reward.transactionId || '-'}
                     </td>
                   </tr>
                 ))}

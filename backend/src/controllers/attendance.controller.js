@@ -162,13 +162,22 @@ const adminGetAll = async (req, res) => {
     startDate,
     endDate,
     date,
+    status,
+    department,
   } = req.query;
 
   const pageNum = Math.max(1, parseInt(page));
   const limitNum = Math.min(parseInt(limit) || PAGINATION.DEFAULT_LIMIT, PAGINATION.MAX_LIMIT);
 
   const filter = {};
+  if (status) filter.status = status;
+  
   if (userId) filter.userId = userId;
+  else if (department) {
+    const usersInDept = await User.find({ department }).select('_id');
+    filter.userId = { $in: usersInDept.map(u => u._id) };
+  }
+
   if (date) {
     filter.date = normalizeDate(date);
   } else if (startDate || endDate) {
@@ -205,80 +214,74 @@ const adminGetAll = async (req, res) => {
  * @access  Admin
  */
 const adminOverride = async (req, res) => {
-  const { userId, date, status } = req.body;
+  const { userId, userIds, date, status } = req.body;
 
-  // Verify user exists
-  const user = await User.findById(userId);
-  if (!user) {
-    return res.status(404).json({ success: false, message: 'User not found.' });
+  const targetUsers = userIds || (userId ? [userId] : []);
+  if (targetUsers.length === 0) {
+    return res.status(400).json({ success: false, message: 'No users specified.' });
   }
 
   const normalizedDate = normalizeDate(date);
+  const results = [];
 
-  // Upsert: update if exists, create if not
-  const attendance = await Attendance.findOneAndUpdate(
-    { userId, date: normalizedDate },
-    {
-      userId,
-      date: normalizedDate,
-      markedAt: new Date(),
-      markedBy: req.user.id,
-      status,
-    },
-    { upsert: true, new: true, runValidators: true }
-  );
+  for (const uid of targetUsers) {
+    const user = await User.findById(uid);
+    if (!user) continue;
 
-  // Recalculate user attendance stats if marking as present
-  if (status === ATTENDANCE_STATUS.PRESENT) {
-    const totalPresent = await Attendance.countDocuments({
-      userId,
-      status: ATTENDANCE_STATUS.PRESENT,
-    });
-    user.attendanceCount = totalPresent;
+    const attendance = await Attendance.findOneAndUpdate(
+      { userId: uid, date: normalizedDate },
+      {
+        userId: uid,
+        date: normalizedDate,
+        markedAt: new Date(),
+        markedBy: req.user.id,
+        status,
+      },
+      { upsert: true, new: true, runValidators: true }
+    );
+    results.push(attendance);
 
-    // Recalculate streak
-    const allAttendance = await Attendance.find({
-      userId,
-      status: ATTENDANCE_STATUS.PRESENT,
-    }).sort({ date: 1 });
+    if (status === ATTENDANCE_STATUS.PRESENT) {
+      const totalPresent = await Attendance.countDocuments({
+        userId: uid,
+        status: ATTENDANCE_STATUS.PRESENT,
+      });
+      user.attendanceCount = totalPresent;
 
-    let currentStreak = 0;
-    let longestStreak = 0;
-    let tempStreak = 0;
+      const allAttendance = await Attendance.find({
+        userId: uid,
+        status: ATTENDANCE_STATUS.PRESENT,
+      }).sort({ date: 1 });
 
-    for (let i = 0; i < allAttendance.length; i++) {
-      if (i === 0) {
-        tempStreak = 1;
-      } else if (isConsecutiveDay(allAttendance[i - 1].date, allAttendance[i].date)) {
-        tempStreak++;
-      } else {
-        tempStreak = 1;
+      let currentStreak = 0;
+      let longestStreak = 0;
+      let tempStreak = 0;
+
+      for (let i = 0; i < allAttendance.length; i++) {
+        if (i === 0) tempStreak = 1;
+        else if (isConsecutiveDay(allAttendance[i - 1].date, allAttendance[i].date)) tempStreak++;
+        else tempStreak = 1;
+        longestStreak = Math.max(longestStreak, tempStreak);
       }
-      longestStreak = Math.max(longestStreak, tempStreak);
-    }
 
-    // Current streak: count back from the most recent
-    currentStreak = 0;
-    for (let i = allAttendance.length - 1; i >= 0; i--) {
-      if (i === allAttendance.length - 1) {
-        currentStreak = 1;
-      } else if (isConsecutiveDay(allAttendance[i].date, allAttendance[i + 1].date)) {
-        currentStreak++;
-      } else {
-        break;
+      currentStreak = 0;
+      for (let i = allAttendance.length - 1; i >= 0; i--) {
+        if (i === allAttendance.length - 1) currentStreak = 1;
+        else if (isConsecutiveDay(allAttendance[i].date, allAttendance[i + 1].date)) currentStreak++;
+        else break;
       }
-    }
 
-    user.currentStreak = currentStreak;
-    user.longestStreak = longestStreak;
-    user.lastAttendance = allAttendance.length > 0 ? allAttendance[allAttendance.length - 1].date : null;
-    await user.save();
+      user.currentStreak = currentStreak;
+      user.longestStreak = longestStreak;
+      user.lastAttendance = allAttendance.length > 0 ? allAttendance[allAttendance.length - 1].date : null;
+      await user.save();
+    }
   }
 
   res.json({
     success: true,
-    message: `Attendance ${status} recorded for ${user.displayName} on ${date}.`,
-    data: attendance,
+    message: `Attendance ${status} recorded for ${targetUsers.length} users on ${date}.`,
+    data: results,
   });
 };
 

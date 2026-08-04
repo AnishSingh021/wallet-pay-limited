@@ -28,6 +28,7 @@ import { AttendancePage } from './pages/dashboard/Attendance';
 import { RewardsPage } from './pages/dashboard/Rewards';
 import { ProfilePage } from './pages/dashboard/Profile';
 import { AnnouncementsPage } from './pages/dashboard/Announcements';
+import { PaymentDetails } from './pages/dashboard/PaymentDetails';
 
 import { AdminOverview } from './pages/admin/AdminOverview';
 import { ManageMembers } from './pages/admin/ManageMembers';
@@ -35,7 +36,10 @@ import { ApprovalsPage } from './pages/admin/Approvals';
 import { ManageRewards } from './pages/admin/ManageRewards';
 import { ManageAnnouncements } from './pages/admin/ManageAnnouncements';
 import { ManageDocuments } from './pages/admin/ManageDocuments';
+import { AdminAttendance } from './pages/admin/AdminAttendance';
+import { ManagePayments } from './pages/admin/ManagePayments';
 import { PublicDocuments } from './pages/Documents';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   const { checkAuth, isLoading } = useAuthStore();
@@ -52,6 +56,7 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <Toaster position="top-right" />
       <BrowserRouter>
         <Routes>
           {/* Public Routes */}
@@ -75,6 +80,7 @@ function App() {
             <Route path="attendance" element={<AttendancePage />} />
             <Route path="rewards" element={<RewardsPage />} />
             <Route path="announcements" element={<AnnouncementsPage />} />
+            <Route path="payment" element={<PaymentDetails />} />
             <Route path="profile" element={<ProfilePage />} />
           </Route>
 
@@ -89,8 +95,10 @@ function App() {
           >
             <Route index element={<AdminOverview />} />
             <Route path="members" element={<ManageMembers />} />
+            <Route path="attendance" element={<AdminAttendance />} />
             <Route path="approvals" element={<ApprovalsPage />} />
             <Route path="rewards" element={<ManageRewards />} />
+            <Route path="payments" element={<ManagePayments />} />
             <Route path="announcements" element={<ManageAnnouncements />} />
             <Route path="documents" element={<ManageDocuments />} />
           </Route>
