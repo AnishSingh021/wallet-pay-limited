@@ -15,6 +15,7 @@ interface AuthState {
   setAccessToken: (token: string) => void;
   logout: () => void;
   checkAuth: () => Promise<void>;
+  refreshUser: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -64,6 +65,17 @@ export const useAuthStore = create<AuthState>()(
           set({ user: null, accessToken: null, isAuthenticated: false });
         } finally {
           set({ isLoading: false });
+        }
+      },
+      
+      refreshUser: async () => {
+        try {
+          const res = await api.get('/users/me');
+          if (res.data.success) {
+            set({ user: res.data.data });
+          }
+        } catch (error) {
+          console.error('Silent user refresh failed');
         }
       }
     }),

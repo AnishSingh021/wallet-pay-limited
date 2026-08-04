@@ -8,7 +8,7 @@ import api from '../../lib/axios';
 import { toast } from 'react-hot-toast';
 
 export function PaymentDetails() {
-  const { user, checkAuth } = useAuthStore();
+  const { user, refreshUser } = useAuthStore();
   const [method, setMethod] = useState<'NONE' | 'UPI' | 'QR' | 'BANK'>(user?.paymentMethod || 'NONE');
   
   const [upiId, setUpiId] = useState(user?.upiId || '');
@@ -23,6 +23,10 @@ export function PaymentDetails() {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const status = user?.paymentStatus || 'None';
+
+  useEffect(() => {
+    refreshUser();
+  }, [refreshUser]);
 
   useEffect(() => {
     if (user) {
@@ -79,7 +83,7 @@ export function PaymentDetails() {
       const res = await api.put('/users/me/payment', payload);
       if (res.data.success) {
         toast.success('Payment details saved successfully!');
-        await checkAuth(); // refresh user context
+        await refreshUser(); // refresh user context
       }
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Failed to save payment details');
