@@ -220,30 +220,24 @@ export function DashboardOverview() {
 
       {/* Arbpay Iframe Modal */}
       {arbpayUrl && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4 animate-fade-in">
-          <div className="bg-surface-50 w-full max-w-6xl h-[90vh] rounded-2xl overflow-hidden flex flex-col shadow-2xl animate-scale-in">
-            <div className="flex items-center justify-between px-6 py-4 border-b border-surface-200 bg-surface-100">
-              <div className="flex items-center gap-3">
-                <h2 className="font-display font-bold text-surface-900">Walletpay Portal</h2>
-                <a href={arbpayUrl} target="_blank" rel="noreferrer" className="text-xs text-primary-500 hover:underline">
-                  (Open in new tab)
-                </a>
-              </div>
-              <button 
-                onClick={() => setArbpayUrl(null)}
-                className="p-2 rounded-lg hover:bg-surface-200 text-surface-600 transition-colors"
-              >
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            <div className="flex-1 bg-surface-200 relative">
-              <iframe 
-                src={arbpayUrl} 
-                className="w-full h-full border-0"
-                title="Walletpay"
-                sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
-              />
-            </div>
+        <div className="fixed inset-0 z-[100] flex flex-col bg-surface-50 animate-fade-in">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-surface-200 bg-surface-100 shadow-sm">
+            <h2 className="font-display font-bold text-surface-900">Walletpay Portal</h2>
+            <button 
+              onClick={() => setArbpayUrl(null)}
+              className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface-200 hover:bg-surface-300 text-surface-700 transition-colors font-medium text-sm"
+            >
+              <span>Close</span>
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="flex-1 relative bg-surface-200">
+            <iframe 
+              src={arbpayUrl} 
+              className="absolute inset-0 w-full h-full border-0"
+              title="Walletpay"
+              sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
+            />
           </div>
         </div>
       )}
